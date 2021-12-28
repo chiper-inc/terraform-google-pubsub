@@ -14,7 +14,7 @@ variable "labels" {
   type        = map(string)
 }
 
-variable "push_endpoint" {
-  description = "Endpoint"
-  type        = string
+variable "push_subscriptions" {
+  description = "Push Subcriptions List"
+  type = list(map(string))
 }
