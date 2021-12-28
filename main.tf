@@ -3,14 +3,15 @@
 data "google_project" "project" {
 }
 
+# Default values
 locals {
   seven_days_in_seconds        = "604800s"
   default_ack_deadline_seconds = 30
   pubsub_svc_account_email     = "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
 }
 
-Adds the Token Creator role to pubsub service account
-Then the push subscriber can use authentication
+# Adds the Token Creator role to pubsub service account
+# Then the push subscriber can use authentication
 resource "google_project_iam_member" "token_creator_binding" {
   project = data.google_project.project.id
   role    = "roles/iam.serviceAccountTokenCreator"
@@ -39,6 +40,10 @@ resource "google_pubsub_subscription_iam_member" "push_subscription_binding" {
     google_pubsub_subscription.push_subscription,
   ]
 }
+
+###
+# TOPICS
+###
 
 resource "google_pubsub_topic" "topic" {
   name                       = var.name

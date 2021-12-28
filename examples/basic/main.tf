@@ -3,6 +3,13 @@ provider "google" {
   project = terraform.workspace
 }
 
+terraform {
+  backend "gcs" {
+    bucket  = "terraform-chiper-poc"
+    prefix  = "terraform/state"
+  }
+}
+
 module "pubsub" {
   source        = "../.."
   name          = "terraform-topic"
