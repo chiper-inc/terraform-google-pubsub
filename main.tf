@@ -43,6 +43,9 @@ resource "google_pubsub_subscription" "push_subscriptions" {
 
   push_config {
     push_endpoint = each.value["endpoint"]
+    oidc_token {
+      service_account_email = each.value["service_account"]
+    }
   }
 
   retry_policy {
@@ -53,10 +56,6 @@ resource "google_pubsub_subscription" "push_subscriptions" {
   dead_letter_policy {
     dead_letter_topic     = google_pubsub_topic.dlq.id
     max_delivery_attempts = 5
-  }
-
-  oidc_token {
-    service_account_email = each.value["service_account"]
   }
 
 }
