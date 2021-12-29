@@ -3,28 +3,17 @@
 data "google_project" "project" {
 }
 
-# LOCAL VALUES
-locals {
-  message_retention_duration   = "604800s"
-  default_message_ordering     = true
-  default_ack_deadline_seconds = 30
-  pubsub_svc_account_email     = "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-}
-
 ###
 # TOPICS
 ###
-
 resource "google_pubsub_topic" "topic" {
-  name                       = var.name
-  labels                     = var.labels
-  message_retention_duration = local.message_retention_duration
+  name   = var.name
+  labels = var.labels
 }
 
 resource "google_pubsub_topic" "dlq" {
-  name                       = "${var.name}-dlq"
-  labels                     = var.labels
-  message_retention_duration = local.message_retention_duration
+  name   = "${var.name}-dlq"
+  labels = var.labels
 }
 
 ## 
@@ -33,24 +22,24 @@ resource "google_pubsub_topic" "dlq" {
 resource "google_pubsub_subscription" "push_subscriptions" {
   for_each = { for i in var.push_subscriptions : i.name => i }
 
-  name                       = each.value.name
+  name                       = each.key
   topic                      = google_pubsub_topic.topic.id
   labels                     = var.labels
-  ack_deadline_seconds       = local.default_ack_deadline_seconds
-  message_retention_duration = local.message_retention_duration
+  ack_deadline_seconds       = lookup(each.value, "ack_deadline_seconds", 30)
+  message_retention_duration = lookup(each.value, "message_retention_duration", "604800s")
   retain_acked_messages      = false
-  enable_message_ordering    = local.default_message_ordering
+  enable_message_ordering    = lookup(each.value, "enable_message_ordering", false)
 
   push_config {
-    push_endpoint = each.value["endpoint"]
+    push_endpoint = each.value.endpoint
     oidc_token {
-      service_account_email = each.value["service_account"]
+      service_account_email = lookup(each.value, "service_account_email", "")
     }
   }
 
   retry_policy {
-    minimum_backoff = "10s"
-    maximum_backoff = "600s"
+    minimum_backoff = lookup(each.value, "retry_minimum_backoff", "10s")
+    maximum_backoff = lookup(each.value, "retry_maximum_backoff", "600s")
   }
 
   dead_letter_policy {
