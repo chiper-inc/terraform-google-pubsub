@@ -12,12 +12,12 @@ locals {
 # TOPICS
 ###
 resource "google_pubsub_topic" "topic" {
-  name   = var.kebab_name
+  name   = local.kebab_name
   labels = var.labels
 }
 
 resource "google_pubsub_topic" "dlq" {
-  name   = "${var.kebab_name}-dlq"
+  name   = "${local.kebab_name}-dlq"
   labels = var.labels
 }
 
