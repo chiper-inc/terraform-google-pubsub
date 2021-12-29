@@ -3,16 +3,21 @@
 data "google_project" "project" {
 }
 
+# LOCALS
+locals {
+    kebab_name = replace(replace(lower(var.name), " ", "-"), "_", "")
+}
+
 ###
 # TOPICS
 ###
 resource "google_pubsub_topic" "topic" {
-  name   = var.name
+  name   = var.kebab_name
   labels = var.labels
 }
 
 resource "google_pubsub_topic" "dlq" {
-  name   = "${var.name}-dlq"
+  name   = "${var.kebab_name}-dlq"
   labels = var.labels
 }
 
@@ -22,7 +27,7 @@ resource "google_pubsub_topic" "dlq" {
 resource "google_pubsub_subscription" "push_subscriptions" {
   for_each = { for i in var.push_subscriptions : i.name => i }
 
-  name                       = each.key
+  name                       = "${replace(replace(lower(each.key), " ", "-"), "_", "")}-sub"
   topic                      = google_pubsub_topic.topic.id
   labels                     = var.labels
   ack_deadline_seconds       = lookup(each.value, "ack_deadline_seconds", 30)
@@ -44,7 +49,7 @@ resource "google_pubsub_subscription" "push_subscriptions" {
 
   dead_letter_policy {
     dead_letter_topic     = google_pubsub_topic.dlq.id
-    max_delivery_attempts = 5
+    max_delivery_attempts = lookup(each.value, "delivery_attempts", 5)
   }
 
 }
