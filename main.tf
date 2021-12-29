@@ -13,37 +13,37 @@ locals {
 
 # Adds the Token Creator role to pubsub service account
 # Then the push subscriber can use authentication
-resource "google_project_iam_member" "token_creator_binding" {
+# resource "google_project_iam_member" "token_creator_binding" {
 
-  project = data.google_project.project.id
-  role    = "roles/iam.serviceAccountTokenCreator"
-  member  = "serviceAccount:${local.pubsub_svc_account_email}"
-  depends_on = [
-    google_pubsub_subscription.push_subscriptions,
-  ]
-}
+#   project = data.google_project.project.id
+#   role    = "roles/iam.serviceAccountTokenCreator"
+#   member  = "serviceAccount:${local.pubsub_svc_account_email}"
+#   depends_on = [
+#     google_pubsub_subscription.push_subscriptions,
+#   ]
+# }
 
-resource "google_pubsub_topic_iam_member" "publisher_role" {
-  project = data.google_project.project.project_id
-  role    = "roles/pubsub.publisher"
-  topic   = google_pubsub_topic.dlq.id
-  member  = "serviceAccount:${local.pubsub_svc_account_email}"
-  depends_on = [
-    google_pubsub_topic.topic,
-  ]
-}
+# resource "google_pubsub_topic_iam_member" "publisher_role" {
+#   project = data.google_project.project.project_id
+#   role    = "roles/pubsub.publisher"
+#   topic   = google_pubsub_topic.dlq.id
+#   member  = "serviceAccount:${local.pubsub_svc_account_email}"
+#   depends_on = [
+#     google_pubsub_topic.topic,
+#   ]
+# }
 
-resource "google_pubsub_subscription_iam_member" "subscriber_role" {
-  for_each = { for i in var.push_subscriptions : i.name => i }
+# resource "google_pubsub_subscription_iam_member" "subscriber_role" {
+#   for_each = { for i in var.push_subscriptions : i.name => i }
 
-  project      = data.google_project.project.project_id
-  subscription = each.value.name
-  role         = "roles/pubsub.subscriber"
-  member       = "serviceAccount:${local.pubsub_svc_account_email}"
-  depends_on = [
-    google_pubsub_subscription.push_subscriptions,
-  ]
-}
+#   project      = data.google_project.project.project_id
+#   subscription = each.value.name
+#   role         = "roles/pubsub.subscriber"
+#   member       = "serviceAccount:${local.pubsub_svc_account_email}"
+#   depends_on = [
+#     google_pubsub_subscription.push_subscriptions,
+#   ]
+# }
 
 ###
 # TOPICS
