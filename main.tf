@@ -37,6 +37,9 @@ resource "google_pubsub_subscription" "push_subscriptions" {
 
   push_config {
     push_endpoint = each.value.endpoint
+    attributes = {
+      x-goog-version = "v1"
+    }
     oidc_token {
       service_account_email = lookup(each.value, "service_account_email", "")
     }
